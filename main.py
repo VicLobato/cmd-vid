@@ -46,7 +46,8 @@ def process(frameRaw):
             row.append(f'\033[3{index[i*x+j]%8}m'+'█▓▒░'[index[i*x+j]//8])
         output.append(''.join(row) + '\033[0m')
     
-    print('\n'.join(output))
+    sys.stdout.write('\n'.join(output) + '\n')
+    sys.stdout.flush()
 
 if __name__ == '__main__':
     # If no args passed explain how to use
@@ -85,9 +86,13 @@ if __name__ == '__main__':
             # Actual conversion happens here
             process(frame)
 
-            # Allign with FPS
-            while time()-start < 1/FPS:
-                sleep(0.01/FPS)
+            # Allign with FPS, skip frames if over
+            if time()-start > 1/FPS:
+                for i in range(round((time()-start)*FPS) - 1):
+                    cap.read()
+            else:
+                while time()-start < 1/FPS:
+                    sleep(0.01/FPS)
 
     # User can manually exit
     except KeyboardInterrupt:
